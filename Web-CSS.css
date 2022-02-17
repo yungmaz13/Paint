@@ -1,0 +1,11 @@
+*{
+    cursor: none;
+}
+.brush{
+    height: 25px;
+    width: 25px;
+    background-color: black;
+    opacity: 75%;
+    border-radius: 50%;
+    position: absolute;
+}
