@@ -1,87 +1,85 @@
 import turtle as t
 
-colours=["black","grey","white","red","yellow","pink","green","orange","violet","purple","blue","aqua","lime"]
-colour=colours[0]
+Colours=["black","grey","white","red","yellow","pink","green","orange","violet","purple","blue","aqua","lime"]
+Colour=Colours[0]
 
 Screen=t.Screen()
 Screen.setup(1.0,1.0)
 Screen.title("Paint")
 Screen.bgcolor("white")
+Screen.tracer(0,0)
 
 Canvas=Screen.getcanvas()
 
 Brush=t.Turtle("circle")
-Brush.color(colour)
+Brush.color(Colour)
 Brush.speed(0)
 Brush.penup()
+Brush.pensize(16)
 
-def addWidth():
-    Brush.shapesize(Brush.shapesize()[0]+1)
-def addHeight():
-    Brush.shapesize(stretch_len=Brush.shapesize()[1]+1)
-def addBoth():
+w,h=Canvas.winfo_width(),Canvas.winfo_height()
+xp,xc=range(w+1),range(-w//2,w//2+1)
+yp,yc=range(h+1),range(-h//2,h//2+1)
+def PixelToCartesian(x:float,y:float):
+    const=5
+    try:
+        return xc[xp.index(x)]-const,-yc[yp.index(y)]+const*10
+    except ValueError:
+        return xc[xp.index(x)]-const,-yc[-1]+const*5
+
+def IncreaseSize():
     Brush.shapesize(Brush.shapesize()[0]+1,Brush.shapesize()[1]+1)
+    Brush.pensize(Brush.shapesize()[0]*16)
 
-def minusWidth():
-    if Brush.shapesize()[0]>1:
-        Brush.shapesize(Brush.shapesize()[0]-1)
-def minusHeight():
-    if Brush.shapesize()[1]>1:
-        Brush.shapesize(stretch_len=Brush.shapesize()[1]-1)
-def minusBoth():
+def DecreaseSize():
     if Brush.shapesize()[0]>1:
         Brush.shapesize(Brush.shapesize()[0]-1)
     if Brush.shapesize()[1]>1:
         Brush.shapesize(Brush.shapesize()[1]-1)
+    Brush.pensize(Brush.shapesize()[0]*16)
 
-draw=False
-def penup(x,y):
-    global draw
-    draw=False
-def pendown(x,y):
-    global draw
-    draw=True
-
-def pixeltocartesian(x:float,y:float):
-    w,h=Canvas.winfo_width(),Canvas.winfo_height()
-    xp,xc=list(range(w+1)),list(range(-w//2,w//2+1))
-    yp,yc=list(range(h+1)),list(range(-h//2,h//2+1))
-    return xc[xp.index(x)]-2,-yc[yp.index(y)]+20
-
-def blink(x,y):
+def Blink(x,y):
     if Brush.isvisible():
         Brush.ht()
     else:
         Brush.st()
 
-def dragging(x,y):
-    Brush.ondrag(None)
-    Brush.stamp()
-    Brush.ondrag(dragging)
-
-def switchcolour():
-    global colour
+def SwitchColour():
+    global Colour
     try:
-        colour=colours[colours.index(colour)+1]
+        Colour=Colours[Colours.index(Colour)+1]
     except IndexError:
-        colour=colours[0]
-    Brush.color(colour)
+        Colour=Colours[0]
+    Brush.color(Colour)
 
-Screen.onkeypress(switchcolour,"z")
-Brush.ondrag(dragging)
-Screen.onscreenclick(blink,2)
-for i,j in enumerate((minusWidth,addWidth,minusHeight,addHeight,minusBoth,addBoth),1):
-    Screen.onkeypress(j,str(i))
+def Draw(x,y):
+    Brush.pd()
+def DontDraw(x,y):
+    Brush.pu()
+
+Brush.onclick(Draw)
+Brush.onrelease(DontDraw)
+Screen.onscreenclick(Blink,2)
 Screen.onkeypress(Brush.clear,"c")
+Screen.onkeypress(DecreaseSize,"1")
+Screen.onkeypress(IncreaseSize,"2")
+Screen.onkeypress(SwitchColour,"z")
+
+def end():
+    Screen.bye()
+    exit()
+
 for i in "q","e":
     Screen.onkeypress(Screen.bye,i)
 
-Screen.listen()
-while True:
-    try:
-        Brush.goto(pixeltocartesian(*Canvas.winfo_pointerxy()))
+def main():
+    Screen.listen()
+    while True:
+        Brush.goto(PixelToCartesian(*Canvas.winfo_pointerxy()))
         Screen.update()
-    except Exception as e:
-        print(e)
+        
+
+if __name__=="__main__":
+    main()
 
 print()
