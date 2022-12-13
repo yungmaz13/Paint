@@ -1,31 +1,52 @@
-import turtle as t
+from turtle import Screen as _Screen, Turtle
 
 Colours=["black","grey","white","red","yellow","pink","green","orange","violet","purple","blue","aqua","lime"]
-Colour=Colours[0]
 
-Screen=t.Screen()
+Screen=_Screen()
 Screen.setup(1.0,1.0)
 Screen.title("Paint")
-Screen.bgcolor("white")
 Screen.tracer(0,0)
 
 Canvas=Screen.getcanvas()
+Width,Height=Canvas.winfo_width(),Canvas.winfo_height()
+HalfWidth,HalfHeight=Width//2,Height//2
 
-Brush=t.Turtle("circle")
-Brush.color(Colour)
+Brush=Turtle("circle")
+Brush.color(Colours[0])
 Brush.speed(0)
 Brush.penup()
 Brush.pensize(16)
 
-w,h=Canvas.winfo_width(),Canvas.winfo_height()
-xp,xc=range(w+1),range(-w//2,w//2+1)
-yp,yc=range(h+1),range(-h//2,h//2+1)
+Background=Turtle()
+Background.ht()
+Background.speed(0)
+
+def BackgroundColour(Colour:str="white"):
+    Background.clear()
+    Background.penup()
+    Background.goto(-HalfWidth,-HalfHeight)
+    
+    Background.color(Colour)
+    Background.begin_fill()
+    
+    Background.goto(HalfWidth,-HalfHeight)
+    Background.goto(HalfWidth,HalfHeight)
+    Background.goto(-HalfWidth,HalfHeight)
+    Background.goto(-HalfWidth,-HalfHeight)
+    
+    Background.end_fill()
+
+    Background.penup()
+    Background.home()
+
+xp,xc=range(Width+1),range(-HalfWidth,HalfWidth+1)
+yp,yc=range(Height+1),range(-HalfHeight,HalfHeight+1)
 def PixelToCartesian(x:float,y:float):
-    const=5
+    Offset=5 # Relative to monitor
     try:
-        return xc[xp.index(x)]-const,-yc[yp.index(y)]+const*10
+        return xc[xp.index(x)]-Offset,-yc[yp.index(y)]+Offset*10
     except ValueError:
-        return xc[xp.index(x)]-const,-yc[-1]+const*5
+        return xc[xp.index(x)]-Offset,-yc[-1]+Offset*5
 
 def IncreaseSize():
     Brush.shapesize(Brush.shapesize()[0]+1,Brush.shapesize()[1]+1)
@@ -45,12 +66,16 @@ def Blink(x,y):
         Brush.st()
 
 def SwitchColour():
-    global Colour
     try:
-        Colour=Colours[Colours.index(Colour)+1]
+        Brush.color(Colours[Colours.index(Brush.color()[0])+1])
     except IndexError:
-        Colour=Colours[0]
-    Brush.color(Colour)
+        Brush.color(Colours[0])
+
+def SwitchBackgroundColour():
+    try:
+        BackgroundColour(Colours[Colours.index(Background.color()[0])+1])
+    except IndexError:
+        BackgroundColour(Colours[0])
 
 def Draw(x,y):
     Brush.pd()
@@ -64,13 +89,24 @@ Screen.onkeypress(Brush.clear,"c")
 Screen.onkeypress(DecreaseSize,"1")
 Screen.onkeypress(IncreaseSize,"2")
 Screen.onkeypress(SwitchColour,"z")
+Screen.onkeypress(SwitchBackgroundColour,"x")
 
 def end():
     Screen.bye()
     exit()
 
 for i in "q","e":
-    Screen.onkeypress(Screen.bye,i)
+    Screen.onkeypress(end,i)
+
+def Post():
+    Brush.ht()
+    Directory="desktop/Paint.eps"
+    Canvas.postscript(file=Directory)
+    Brush.st()
+    
+    return
+
+Screen.onkeypress(Post,"Return")
 
 def main():
     Screen.listen()
